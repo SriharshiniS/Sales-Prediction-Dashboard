@@ -1,0 +1,13 @@
+body {
+    background-color: #f4f6f9;
+}
+h1 {
+    color: #0d6efd;
+}
+.card {
+    background-color: #ffffff;
+    border-radius: 15px;
+}
+.alert {
+    font-size: 1.1rem;
+}

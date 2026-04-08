@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Prediction Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="text-center mb-4">📊 Sales Prediction Dashboard</h1>
+
+    <div class="row">
+        <!-- Input Form -->
+        <div class="col-md-4 mb-4">
+            <div class="card p-4 shadow-sm">
+                <h4 class="card-title mb-3">Enter Budget Details</h4>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="TV" class="form-label">TV Budget ($)</label>
+                        <input type="number" step="0.01" class="form-control" id="TV" name="TV" required min="0">
+                    </div>
+                    <div class="mb-3">
+                        <label for="Radio" class="form-label">Radio Budget ($)</label>
+                        <input type="number" step="0.01" class="form-control" id="Radio" name="Radio" required min="0">
+                    </div>
+                    <div class="mb-3">
+                        <label for="Newspaper" class="form-label">Newspaper Budget ($)</label>
+                        <input type="number" step="0.01" class="form-control" id="Newspaper" name="Newspaper" required min="0">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Predict Sales</button>
+                </form>
+
+                {% if prediction is not none %}
+                <div class="alert alert-success mt-4 text-center">
+                    Predicted Sales: <strong>{{ prediction }}</strong> units
+                </div>
+                {% endif %}
+
+                {% if error %}
+                <div class="alert alert-danger mt-4 text-center">
+                    Error: {{ error }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="col-md-8 mb-4">
+            <div class="card p-4 shadow-sm">
+                <h4 class="card-title mb-3">Sales Comparison Chart</h4>
+                <canvas id="salesChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    {% if chart_data %}
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_data.labels | safe }},
+            datasets: [
+                {
+                    label: 'Actual Sales',
+                    data: {{ chart_data.actual | safe }},
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13, 110, 253, 0.2)',
+                    tension: 0.3,
+                    pointBackgroundColor: function(context) {
+                        return context.dataIndex === {{ chart_data.actual | length }} - 1 ? 'red' : '#0d6efd';
+                    }
+                },
+                {
+                    label: 'Predicted Sales',
+                    data: {{ chart_data.predicted | safe }},
+                    borderColor: '#198754',
+                    backgroundColor: 'rgba(25, 135, 84, 0.2)',
+                    tension: 0.3,
+                    pointBackgroundColor: function(context) {
+                        return context.dataIndex === {{ chart_data.predicted | length }} - 1 ? 'orange' : '#198754';
+                    }
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: { display: true, text: 'Historical vs Predicted Sales' }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+    {% endif %}
+</script>
+</body>
+</html>
